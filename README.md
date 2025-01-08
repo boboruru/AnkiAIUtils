@@ -558,7 +558,7 @@ Click to read more
 - load API keys from env variable instead
 - use toml instead of json? it allows setting comments too
 - make it installable with a setup.py on pypi
-- use beartype everywhere for statyc typing and code cleanliness
+- use beartype everywhere for static typing and code cleanliness
 - do a unique class that could be used to unify all those codes
     - arguments:
         - name (to differentiate each children: for example "illustrator")
