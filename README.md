@@ -553,12 +553,9 @@ Click to read more
 
 <i>This TODO list is maintained automatically by [MdXLogseqTODOSync](https://github.com/thiswillbeyourgithub/MdXLogseqTODOSync)</i>
 <!-- BEGIN_TODO -->
-- turn those scripts into addons
+- turn those scripts into addons (for that, please help me for the rest of the TODO and it should make the addonification more straightforward)
 - ### Applies to all tools
 - load API keys from env variable instead
-- use toml instead of json? it allows setting comments too
-- make it installable with a setup.py on pypi
-- use beartype everywhere for static typing and code cleanliness
 - do a unique class that could be used to unify all those codes
     - arguments:
         - name (to differentiate each children: for example "illustrator")
@@ -595,14 +592,17 @@ Click to read more
     - rewrite each script to use this class
     - the --help should be redirected to the class of each project
     - make each class use the same entrypoint
-- add an arg to include tags or not in the LLM context for a given note, as otherwise the LLM can get confused by some acronyms
-    - but with a regex arg to keep only the tags that match the regex. This way we can keep only a portion of them for the LLM
+- use toml instead of json? it allows setting comments too
+- use beartype everywhere for static typing and code cleanliness
 - store all inference in a compressed sqlite db instead of a json. It gets too large
 - add check that we indeed removed all the done tags
 - actually there's no need to store the "Done" tags because all important info is stored in the field
 - use xml formatting for the examples
     - make use of <thinking> tags too
 - tell user how much time each answer took
+- add an arg to include tags or not in the LLM context for a given note, as otherwise the LLM can get confused by some acronyms
+    - but with a regex arg to keep only the tags that match the regex. This way we can keep only a portion of them for the LLM
+- make it installable with a setup.py on pypi
 -
 - ### Mnemonics Creator
     - Add keybindings
