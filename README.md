@@ -562,8 +562,39 @@ Click to read more
 - do a unique class that could be used to unify all those codes
     - arguments:
         - name (to differentiate each children: for example "illustrator")
+        - query
+        - output field name
+        - template
+        - tags_regex (to tell which tags to include in the template)
+        - llm name
+        - embedding_model
+        - llm_max_token
+        - llm_temp
+        - tkn_warn_limit (to know when to stop)
+        - exclude_media
+        - exclude_version
+        - exclude_done
+        - n_note_limit
+        - do_sync
+        - callback (function like ntfy_url)
+        - debug
+        - parallel
+        - force
+        - print_db_then_exit
+    - methods:
         - string_format (can be overloaded)
+        - load_history
+        - save_history
+        - total_cost
+        - execute_query (to find those cards and apply the filters given by arguments)
+        - loop_over_notes (that check that compute_new_field is indeed declared)
+        - addtags et removetags
+    - note:
         - in the init, check that indeed there is a version attribute
+        - make sure to use a self.lock
+    - rewrite each script to use this class
+    - the --help should be redirected to the class of each project
+    - make each class use the same entrypoint
 - add an arg to include tags or not in the LLM context for a given note, as otherwise the LLM can get confused by some acronyms
     - but with a regex arg to keep only the tags that match the regex. This way we can keep only a portion of them for the LLM
 - store all inference in a compressed sqlite db instead of a json. It gets too large
@@ -576,6 +607,9 @@ Click to read more
 - ### Mnemonics Creator
     - Add keybindings
         - binding e to edit a proposition
+        - binding to restart generation
+        - binding to enter chat mode and construct the mnemonics with him
+-
 - ### Illustrator
 - use an llm to extract numbers
     - ask it to do quick transformations like turn 48h into 2 days, modify units, etc,
@@ -606,9 +640,14 @@ Click to read more
 - always sort those tags by alphabetical order
 - add modes:
     - mode "predefined": the user gives a list of tags and the LLM finds which to apply to each note given a query
+    - mode "natural_list": where the LLM creates the list itself
         - loop over each note and ask it to generate tags
+        - but also show the list of tags until now
+          then finally loop all over again and ask the LLM to tell which tag from a list should apply after filtering via embeddings
+        - but still allow starting from a premade list
 - arg for image support if media found
     - if the card contains an image, it should be hashed, then a cached call to a func that asks a vision model to describe the type of image, then use the embedding of this answer to suggest the appropriate tags to suggest to the LLM for classification
+    - image should have their own tags, like "imagery", "decision tree", "classification", "table" etc
 <!-- END_TODO -->
 
 ## Credits
