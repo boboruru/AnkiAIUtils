@@ -380,12 +380,19 @@ Dataset files (like `explainer_dataset.txt`, `reformulator_dataset.txt`, etc.) a
 
 </details>
 
-## Usage
+## Usage / Getting started
 
 <details>
 <summary>
 Click to read more
 </summary>
+
+To get started using those scripts (and until someone comes along to help me turn it into an addon!), the steps are roughly:
+0. **Note: if you don't understand those steps, I recommend self teaching you using LLMs. The steps always differ slightly depending on if you are on macos/linux/windows but the idea is always the same**
+1. Make sure you have python installed in your console. The recommended python version is 3.12.7 or 3.11.something because that's what I used at the time. If you try to use more recent versions you will probably encounter problems.
+2. git clone https://github.com/thiswillbeyourgithub/AnkiAIUtils/
+3. I recommend creating a virtual environment for python inside this new folder, for example `uv venv` then `source .venv/bin/activate` on my linux.
+4. Run a script, for that refer to the individual usage sections below.
 
 #### Reformulator
 The Reformulator can be run from the command line:
