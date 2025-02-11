@@ -31,8 +31,6 @@ from PIL import Image
 
 import litellm
 from litellm import completion, image_generation
-from stability_sdk import client
-import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 from utils.misc import send_ntfy, load_formatting_funcs, replace_media
 from utils.llm import load_api_keys, llm_price, sd_price, tkn_len, chat, model_name_matcher
@@ -52,6 +50,12 @@ log_file = ILLUSTRATOR_DIR / f"{today}.logs.txt"
 Path(log_file).touch()
 whi, yel, red = create_loggers(log_file, ["white", "yellow", "red"])
 
+try:
+    from stability_sdk import client
+    import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
+    # make stability_sdk optional if the user has trouble installing the lib and needs only Dall-E
+except Exception as err:
+    red(f"Error when importing stability_sdk, you won't be able to use stable diffusion: '{err}'")
 
 # The Major System is a mnemonic system for memorizing numbers by converting them
 # to consonant sounds, then into words. This table maps digits to their corresponding
