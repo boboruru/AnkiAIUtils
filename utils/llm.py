@@ -13,6 +13,46 @@ from .shared import shared
 
 litellm.drop_params = True
 
+# ---------------------------------------------------------------------------
+# MiniMax provider registration
+# ---------------------------------------------------------------------------
+# MiniMax offers an OpenAI-compatible API at https://api.minimax.io/v1
+# Register models so litellm's model_cost / models_by_provider can find them.
+
+MINIMAX_API_BASE = "https://api.minimax.io/v1"
+
+MINIMAX_MODELS = {
+    "MiniMax-M2.7": {
+        "max_tokens": 204800,
+        "max_input_tokens": 204800,
+        "max_output_tokens": 16384,
+        "input_cost_per_token": 0.000001,
+        "output_cost_per_token": 0.000003,
+        "litellm_provider": "openai",
+    },
+    "MiniMax-M2.7-highspeed": {
+        "max_tokens": 204800,
+        "max_input_tokens": 204800,
+        "max_output_tokens": 16384,
+        "input_cost_per_token": 0.0000005,
+        "output_cost_per_token": 0.0000015,
+        "litellm_provider": "openai",
+    },
+}
+
+
+def _register_minimax() -> None:
+    """Register MiniMax models with litellm so they appear in
+    ``litellm.models_by_provider`` and ``litellm.model_cost``.
+    """
+    litellm.models_by_provider["minimax"] = list(MINIMAX_MODELS.keys())
+    for model_name, cost_info in MINIMAX_MODELS.items():
+        litellm.model_cost[f"minimax/{model_name}"] = cost_info
+        litellm.model_cost[model_name] = cost_info
+
+
+_register_minimax()
+
 def load_api_keys() -> Dict:
     """Load API keys from files in the API_KEYS directory.
 
@@ -101,6 +141,18 @@ def chat(
     **kwargs: Dict,
     ) -> Dict:
     """call to the LLM api. Cached."""
+    # Handle MiniMax models: route through OpenAI-compatible API
+    if model.startswith("minimax/"):
+        model_name = model.split("/", 1)[1]
+        kwargs["api_base"] = MINIMAX_API_BASE
+        kwargs["api_key"] = os.environ.get("MINIMAX_API_KEY")
+        # MiniMax requires temperature in (0.0, 1.0]
+        if temperature <= 0:
+            temperature = 0.01
+        elif temperature > 1:
+            temperature = 1.0
+        model = f"openai/{model_name}"
+
     answer = completion(
         model=model,
         messages=messages,
