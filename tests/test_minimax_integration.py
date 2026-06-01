@@ -20,6 +20,26 @@ MINIMAX_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
 class TestMiniMaxIntegration(unittest.TestCase):
     """Integration tests that call the live MiniMax API."""
 
+    def test_chat_minimax_m3(self):
+        """Test a basic chat completion with MiniMax-M3."""
+        from utils.llm import MINIMAX_API_BASE
+        from litellm import completion
+
+        response = completion(
+            model="openai/MiniMax-M3",
+            messages=[{"role": "user", "content": "Say hello in one word."}],
+            temperature=0.5,
+            api_base=MINIMAX_API_BASE,
+            api_key=MINIMAX_API_KEY,
+            stream=False,
+        )
+        result = response.json()
+        self.assertIn("choices", result)
+        self.assertGreater(len(result["choices"]), 0)
+        content = result["choices"][0]["message"]["content"]
+        self.assertIsInstance(content, str)
+        self.assertGreater(len(content), 0)
+
     def test_chat_minimax_m27(self):
         """Test a basic chat completion with MiniMax-M2.7."""
         from utils.llm import MINIMAX_API_BASE

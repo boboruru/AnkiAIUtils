@@ -245,14 +245,14 @@ The tools use [LiteLLM](https://docs.litellm.ai/docs/) which provides a unified 
 - OpenAI
 - Anthropic
 - Google
-- [MiniMax](https://www.minimaxi.com/) (MiniMax-M2.7, MiniMax-M2.7-highspeed — 204K context)
+- [MiniMax](https://www.minimaxi.com/) (MiniMax-M3 — 512K context, MiniMax-M2.7, MiniMax-M2.7-highspeed — 204K context)
 - OpenRouter
 - Azure
 - AWS Bedrock
 - Local models
 - And many more
 
-Just specify the model in LiteLLM format (e.g. "openai/gpt-4", "anthropic/claude-3-opus", or "minimax/MiniMax-M2.7") and it will handle the rest. For MiniMax, place your API key in a file named `MINIMAX` inside the `API_KEYS/` directory (the tools will load it as `MINIMAX_API_KEY`).
+Just specify the model in LiteLLM format (e.g. "openai/gpt-4", "anthropic/claude-3-opus", or "minimax/MiniMax-M3") and it will handle the rest. For MiniMax, place your API key in a file named `MINIMAX` inside the `API_KEYS/` directory (the tools will load it as `MINIMAX_API_KEY`).
 
 ### What languages are supported?
 The tools work in any language supported by the LLM you choose to use. Since these scripts support virtually all LLM providers through LiteLLM, you can use any model that works well with your language. For example:

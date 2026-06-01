@@ -22,6 +22,14 @@ litellm.drop_params = True
 MINIMAX_API_BASE = "https://api.minimax.io/v1"
 
 MINIMAX_MODELS = {
+    "MiniMax-M3": {
+        "max_tokens": 524288,
+        "max_input_tokens": 524288,
+        "max_output_tokens": 131072,
+        "input_cost_per_token": 0.0000006,
+        "output_cost_per_token": 0.0000024,
+        "litellm_provider": "openai",
+    },
     "MiniMax-M2.7": {
         "max_tokens": 204800,
         "max_input_tokens": 204800,

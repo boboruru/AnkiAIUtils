@@ -20,6 +20,7 @@ class TestMiniMaxRegistration(unittest.TestCase):
         from utils.llm import _register_minimax
         _register_minimax()
         self.assertIn("minimax", litellm.models_by_provider)
+        self.assertIn("MiniMax-M3", litellm.models_by_provider["minimax"])
         self.assertIn("MiniMax-M2.7", litellm.models_by_provider["minimax"])
         self.assertIn(
             "MiniMax-M2.7-highspeed", litellm.models_by_provider["minimax"]
@@ -29,8 +30,10 @@ class TestMiniMaxRegistration(unittest.TestCase):
         import litellm
         from utils.llm import _register_minimax
         _register_minimax()
+        self.assertIn("minimax/MiniMax-M3", litellm.model_cost)
         self.assertIn("minimax/MiniMax-M2.7", litellm.model_cost)
         self.assertIn("minimax/MiniMax-M2.7-highspeed", litellm.model_cost)
+        self.assertIn("MiniMax-M3", litellm.model_cost)
         self.assertIn("MiniMax-M2.7", litellm.model_cost)
         self.assertIn("MiniMax-M2.7-highspeed", litellm.model_cost)
 
@@ -45,6 +48,18 @@ class TestMiniMaxRegistration(unittest.TestCase):
         self.assertGreater(cost["input_cost_per_token"], 0)
         self.assertGreater(cost["output_cost_per_token"], 0)
         self.assertEqual(cost["max_tokens"], 204800)
+
+    def test_m3_pricing_and_context(self):
+        """MiniMax-M3 should be registered with 512K context and correct pricing."""
+        import litellm
+        from utils.llm import _register_minimax
+        _register_minimax()
+        cost = litellm.model_cost["minimax/MiniMax-M3"]
+        self.assertEqual(cost["max_tokens"], 524288)
+        self.assertEqual(cost["max_input_tokens"], 524288)
+        self.assertEqual(cost["max_output_tokens"], 131072)
+        self.assertGreater(cost["input_cost_per_token"], 0)
+        self.assertGreater(cost["output_cost_per_token"], 0)
 
     def test_register_minimax_idempotent(self):
         """Calling _register_minimax() multiple times should not error."""
