@@ -3,7 +3,7 @@ from typing import Dict
 import json
 from py_ankiconnect import PyAnkiconnect
 
-anki = PyAnkiconnect()
+anki = PyAnkiconnect(default_port=8766)
 
 def sync_anki() -> None:
     "trigger anki synchronization"

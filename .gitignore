@@ -1,4 +1,6 @@
 API_KEY*
+env/
+.venv/
 
 databases
 author_dir
@@ -13,3 +15,7 @@ __pycache__
 
 
 .aider*
+
+usage_count.json
+window_geometry.json
+backups/

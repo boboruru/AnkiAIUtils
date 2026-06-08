@@ -25,6 +25,14 @@ def _embedder(text_list, model_name):
     """compute the emebdding of 1 text"""
     assert isinstance(text_list, list), f"text_list must be list, not {type(text_list)}"
 
+    if model_name.startswith("local/"):
+        # 使用本機 sentence-transformers，不需要 API Key
+        from sentence_transformers import SentenceTransformer
+        local_model_name = model_name[len("local/"):]
+        model = SentenceTransformer(local_model_name)
+        vecs = model.encode(text_list)
+        return [np.array(v).reshape(1, -1) for v in vecs]
+
     vec = litellm.embedding(
             model=model_name,
             input=text_list,
@@ -64,7 +72,7 @@ def load_dataset(
         check_args = {}
     path = Path(path)
     assert path.exists(), f"{path} not found"
-    dataset = path.read_text()
+    dataset = path.read_text(encoding="utf-8")
     assert dataset, "Empty dataset file"
     assert len(re.split(DATASET_SEPARATOR_INVALID, dataset)) == 1
     dataset = re.split(DATASET_SEPARATOR, dataset)
@@ -420,7 +428,7 @@ def load_and_embed_anchors(path: str, model: str):
     """
     path = Path(path)
     assert path.exists(), f"Anchor file not found: {path}"
-    content = path.read_text()
+    content = path.read_text(encoding="utf-8")
     assert content, "Empty anchor file"
 
     embeddings = {}
