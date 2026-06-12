@@ -162,10 +162,12 @@ class ReviewHelperGUI(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self.current_card = None
+        self.anki_connected = True  # 由背景輪詢更新，用來區分「連不上」與「沒在複習」
         self.items = []  # list of queue-item dicts, in queue order
 
         self.work_q = queue.Queue()
         self.result_q = queue.Queue()
+        self.poll_q = queue.Queue()  # 背景輪詢丟回 guiCurrentCard 結果
 
         self.usage_lock = threading.Lock()
         self.usage_date, self.usage_count = load_usage()
@@ -176,8 +178,13 @@ class ReviewHelperGUI(tk.Tk):
         self.worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
         self.worker_thread.start()
 
-        self.after(100, self.poll_current_card)
+        # guiCurrentCard 是阻塞式 HTTP，必須跑在背景執行緒，否則會卡住 UI 事件迴圈
+        # 導致拖曳/縮放視窗頓挫。UI 端只透過 poll_q 取結果更新畫面。
+        self.poll_thread = threading.Thread(target=self._poll_loop, daemon=True)
+        self.poll_thread.start()
+
         self.after(RESULT_DRAIN_MS, self.drain_results)
+        self.after(RESULT_DRAIN_MS, self.drain_poll)
 
     # ------------------------------------------------------------------
     # UI construction
@@ -234,16 +241,33 @@ class ReviewHelperGUI(tk.Tk):
     # ------------------------------------------------------------------
     # Polling currently-reviewed card
     # ------------------------------------------------------------------
-    def poll_current_card(self):
-        try:
-            card = anki(action="guiCurrentCard")
-        except Exception:
-            card = None
-        self.current_card = card
-        self._update_preview_label(card)
-        self.after(POLL_INTERVAL_MS, self.poll_current_card)
+    def _poll_loop(self):
+        """背景執行緒：定時問 Anki 目前複習的卡片，結果丟進 poll_q 由 UI 端取用。"""
+        while True:
+            try:
+                self.poll_q.put(("ok", anki(action="guiCurrentCard")))
+            except Exception:
+                self.poll_q.put(("error", None))
+            time.sleep(POLL_INTERVAL_MS / 1000)
 
-    def _update_preview_label(self, card):
+    def drain_poll(self):
+        latest = None
+        try:
+            while True:
+                latest = self.poll_q.get_nowait()
+        except queue.Empty:
+            pass
+        if latest is not None:
+            kind, card = latest
+            self.anki_connected = kind == "ok"
+            self.current_card = card if kind == "ok" else None
+            self._update_preview_label(kind, card)
+        self.after(RESULT_DRAIN_MS, self.drain_poll)
+
+    def _update_preview_label(self, kind, card):
+        if kind == "error":
+            self.preview_var.set("⚠️ 連不上 Anki（請確認 Anki 已開啟、AnkiConnect 已啟用）")
+            return
         if not card:
             self.preview_var.set("（未在複習中）")
             return
@@ -256,7 +280,10 @@ class ReviewHelperGUI(tk.Tk):
     def on_queue_button_click(self):
         card = self.current_card
         if card is None:
-            self._flash_status("目前不在複習畫面中，無法加入佇列")
+            if not self.anki_connected:
+                self._flash_status("連不上 Anki，請確認 Anki 已開啟、AnkiConnect 已啟用")
+            else:
+                self._flash_status("目前不在複習畫面中，無法加入佇列")
             return
 
         cid = card["cardId"]
@@ -362,7 +389,8 @@ class ReviewHelperGUI(tk.Tk):
     # ------------------------------------------------------------------
     def _refresh_treeview(self):
         self.tree.delete(*self.tree.get_children())
-        for item in self.items:
+        # 最新加入的置頂顯示（self.items 仍維持佇列處理順序，只反轉顯示）
+        for item in reversed(self.items):
             queued_str = time.strftime("%H:%M:%S", time.localtime(item["queued_at"]))
             elapsed_str = self._format_elapsed(item)
             self.tree.insert(
